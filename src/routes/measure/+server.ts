@@ -47,7 +47,7 @@ async function measureTimes(edge, stub, platform, request, fetchFn) {
     }
 }
 
-export const GET: RequestHandler = async ({ platform, request }) => {
+export const GET: RequestHandler = async ({ platform, request, fetch }) => {
     let stub = platform?.env.DURABLE_SSE.getByName("cold-starts")
     let stream = await stub.createStream()
 
