@@ -4,7 +4,7 @@
  */
 {
     "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "pages",
+    "name": "coldstarts-xyz",
     "main": ".svelte-kit/cloudflare/_worker.js",
     "compatibility_date": "2026-06-08",
     "compatibility_flags": [
