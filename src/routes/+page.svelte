@@ -56,12 +56,13 @@
                 let ci = item.loading.lastIndexOf(".");
                 if ((item.times.length === 3 || item.error) && ci === -1) {
                     item.completed = true;
+                    item.half_completed = true;
                     completed = true;
                     continue;
                 }
 
                 if (
-                    item.times.length === 2 &&
+                    item.times.length >= 2 &&
                     item.loading.length >= Math.floor(WIDTH / 2)
                 ) {
                     item.half_completed = true;
