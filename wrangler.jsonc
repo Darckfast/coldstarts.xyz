@@ -50,6 +50,16 @@
             }
         ]
     },
+    "services": [
+        {
+            "binding": "WORKER",
+            "service": "edge-cold-start-cf-worker"
+        },
+        {
+            "binding": "WORKER_GO",
+            "service": "edge-cold-start-cf-worker-go"
+        }
+    ],
     "kv_namespaces": [
         {
             "binding": "TIMES",

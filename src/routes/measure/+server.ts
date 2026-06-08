@@ -47,18 +47,18 @@ async function measureTimes(edge, stub, platform, request, fetchFn) {
     }
 }
 
-export const GET: RequestHandler = async ({ platform, request, fetch }) => {
+export const GET: RequestHandler = async ({ platform, request }) => {
     let stub = platform?.env.DURABLE_SSE.getByName("cold-starts")
     let stream = await stub.createStream()
 
-    let cfWorkerFn = () => fetch(new URL(platform.env.WORKER_URL), {
+    let cfWorkerFn = () => platform.env.WORKER.fetch("http://dummy.url", {
         method: "post",
         Headers: {
             'content-type': 'application/json'
         },
     })
 
-    let cfWorkerGoWasmFn = () => fetch(new URL(platform.env.WORKER_GO_URL), {
+    let cfWorkerGoFn = () => platform.env.WORKER_GO.fetch("http://dummy.url", {
         method: "post",
         Headers: {
             'content-type': 'application/json'
@@ -68,7 +68,7 @@ export const GET: RequestHandler = async ({ platform, request, fetch }) => {
     platform?.ctx.waitUntil((async () => {
         await Promise.allSettled([
             measureTimes('cloudflare-worker', stub, platform, request, cfWorkerFn),
-            measureTimes('cloudflare-worker-go', stub, platform, request, cfWorkerGoWasmFn)
+            measureTimes('cloudflare-worker-go', stub, platform, request, cfWorkerGoFn)
         ])
     })())
 
