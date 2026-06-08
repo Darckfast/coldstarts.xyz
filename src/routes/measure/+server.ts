@@ -16,13 +16,13 @@ async function measureTimes(edge, stub, platform, request, fetchFn) {
     let srcDc = request.cf?.colo || 'Unknown'
     let results = []
     let proms = []
-    let measures = { edge, time: Date.now(), error: undefined, datacenter: `${srcDc} ->` }
+    let measures = { edge, time: Date.now(), error: undefined, datacenter: `${srcDc} -> ` }
     proms.push(stub.pushData(JSON.stringify(measures)))
     results.push(structuredClone(measures))
 
     let rs = await fetchFn()
 
-    measures.datacenter += rs.headers.get('x-datacenter') || " Unknown"
+    measures.datacenter += rs.headers.get('x-datacenter') || "Unknown"
 
     if (!rs.ok) {
         measures.time = Date.now()

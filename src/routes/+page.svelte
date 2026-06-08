@@ -6,6 +6,7 @@
         times: Array<number>;
         loading: string;
         completed: boolean;
+        half_completed: boolean;
         error: undefined | number;
     };
     let data = $state<Array<Results>>([]);
@@ -57,6 +58,13 @@
                     item.completed = true;
                     completed = true;
                     continue;
+                }
+
+                if (
+                    item.times.length === 2 &&
+                    item.loading.length >= Math.floor(WIDTH / 2)
+                ) {
+                    item.half_completed = true;
                 }
 
                 let chr = ".";
@@ -139,7 +147,7 @@
                     >
                         {#if d.error}
                             <span class="">error</span>
-                        {:else if d.completed}
+                        {:else if d.half_completed}
                             <span class="text-black bg-white w-full"
                                 >{d.times[1] - d.times[0]}ms</span
                             >
