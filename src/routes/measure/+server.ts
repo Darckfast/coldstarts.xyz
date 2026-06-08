@@ -1,4 +1,4 @@
-import type { RequestHandler } from "./$types";
+import type { RequestHandler } from "../$types";
 
 async function measureTimes(edge, stub, platform, request, fetchFn) {
     let key = `edge:${edge}:${new Date().setMinutes(0, 0, 0)}`
@@ -30,6 +30,7 @@ async function measureTimes(edge, stub, platform, request, fetchFn) {
         proms.push(stub.pushData(JSON.stringify(measures)))
         results.push(structuredClone(measures))
 
+        console.error('error fetching api', rs.status)
         await Promise.allSettled(proms)
     } else {
         let body = await rs.json()
@@ -50,14 +51,14 @@ export const GET: RequestHandler = async ({ platform, request }) => {
     let stub = platform?.env.DURABLE_SSE.getByName("cold-starts")
     let stream = await stub.createStream()
 
-    let cfWorkerFn = () => fetch(platform.env.WORKER_URL, {
+    let cfWorkerFn = () => fetch(new URL(platform.env.WORKER_URL), {
         method: "post",
         Headers: {
             'content-type': 'application/json'
         },
     })
 
-    let cfWorkerGoWasmFn = () => fetch(platform.env.WORKER_GO_URL, {
+    let cfWorkerGoWasmFn = () => fetch(new URL(platform.env.WORKER_GO_URL), {
         method: "post",
         Headers: {
             'content-type': 'application/json'
