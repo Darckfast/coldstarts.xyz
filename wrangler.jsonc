@@ -45,7 +45,7 @@
         "bindings": [
             {
                 "name": "DURABLE_SSE",
-                // "script_name": "sse",
+                "script_name": "durable-sse",
                 "class_name": "DurableSSE"
             }
         ]
