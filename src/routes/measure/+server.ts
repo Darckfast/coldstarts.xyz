@@ -30,7 +30,7 @@ async function measureTimes(edge, stub, platform, request, fetchFn) {
         proms.push(stub.pushData(JSON.stringify(measures)))
         results.push(structuredClone(measures))
 
-        console.error('error fetching api', rs.status)
+        console.error('error fetching api', rs.status, rs.url)
         await Promise.allSettled(proms)
     } else {
         let body = await rs.json()
