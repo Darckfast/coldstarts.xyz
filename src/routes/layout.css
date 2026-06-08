@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+html,
+body {
+    font-family: "Roboto Mono", sans-serif;
+    /* background-color: #000000; */
+    /* background: radial-gradient(circle, transparent 20%, #000000 20%, #000000 80%, transparent 80%, transparent), radial-gradient(circle, transparent 20%, #000000 20%, #000000 80%, transparent 80%, transparent) 10px 10px, linear-gradient(#171717 0.8px, transparent 0.8px) 0 -0.4px, linear-gradient(90deg, #171717 0.8px, #000000 0.8px) -0.4px 0; */
+    /* background-size: 20px 20px, 20px 20px, 10px 10px, 10px 10px; */
+}
+
+body {
+    scrollbar-gutter: stable both-edges;
+}
+
+i {
+    flex-shrink: 0;
+    height: 1.5rem;
+    width: 1.5rem;
+}
