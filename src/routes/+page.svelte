@@ -12,7 +12,7 @@
     let timePlaceholder = $state(0);
 
     onMount(() => {
-        const sse = new EventSource("/");
+        const sse = new EventSource("/measure");
 
         sse.onmessage = (e) => {
             let results = JSON.parse(e.data);
