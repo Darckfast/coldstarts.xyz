@@ -169,11 +169,19 @@
                         {/if}
                     </span>
                 </span>
-                <div class="w-full flex flex-col justify-center items-center">
+                <div
+                    class="w-full flex flex-col justify-center items-center"
+                    class:bg-red-500!={d.error !== undefined}
+                    class:text-white!={d.error !== undefined}
+                >
                     <span class="w-full text-gray-500">{d.loading}</span>
-                    <span class="absolute text-gray-300 bg-black px-2"
-                        >{d.datacenter}</span
-                    >
+                    {#if d.error}
+                        <span class="font-bold">ERROR</span>
+                    {:else}
+                        <span class="absolute text-gray-300 bg-black px-2"
+                            >{d.datacenter}</span
+                        >
+                    {/if}
                 </div>
 
                 <span

@@ -4,7 +4,7 @@ wrangler = { version = "4.99", allow_builds = ["esbuild", "sharp", "workerd"] }
 
 [tasks.init]
 run = """
-wrangler d1 migrations apply --local EDGE_COLD_STARTS_DB --persist-to .
+wrangler d1 migrations apply --local EDGE_DB --persist-to .wrangler/state
 """
 
 [tasks.dev]
