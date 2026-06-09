@@ -1,59 +1,23 @@
 import type { RequestHandler } from "../$types";
 
-let edges = [
-    {
-        edge: 'cloudflare-worker',
-    },
-    {
-        edge: 'cloudflare-worker-tinygo',
-    },
-    {
-        edge: 'vercel-go',
-    },
-    {
-        edge: 'vercel-nodejs',
-    },
-    {
-        edge: 'vercel-rust',
-    },
-    {
-        edge: 'vercel-bun',
-    },
-    {
-        edge: 'deno-deploy',
-    },
-    {
-        edge: 'deno-deploy-go',
-    },
-    {
-        edge: 'netlify',
-    },
-    {
-        edge: 'netlify-go',
-    },
-    {
-        edge: 'fastly-tinygo',
-    },
-    {
-        edge: 'fastly-js',
-    },
-    {
-        edge: 'fastly-rust',
-    },
-]
 
 async function measureTimes(stub, platform) {
+    let { results } = await platform.env.EDGE_DB.prepare(`SELECT 
+e.name, 
+h.timestamp, 
+h.metadata 
+    FROM edges e 
+    INNER JOIN history h 
+        ON h.edge_id = e.id
+    WHERE h.created_at >= unixepoch('subsec') * 1000 - 3600000 -1
+    ORDER BY h.id`).run()
     let proms = []
-    for (let i = 0; i < edges.length; i++) {
-        let key = `edge:${edges[i]}:${new Date().setMinutes(0, 0, 0)}`
-        let result = await platform?.env.TIMES.get(key)
 
-        if (result) {
-            let saved = JSON.parse(result)
-            for (let i = 0; i < saved.length; i++) {
-                proms.push(stub.pushData(JSON.stringify(saved[i])))
-            }
-        }
+    console.log(results)
+    for (let i = 0; i < results.length; i++) {
+        let edge = results[i]
+        proms.push(stub.pushData(JSON.stringify(edge)))
+        console.log(edge)
     }
 
     await Promise.allSettled(proms)
