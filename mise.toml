@@ -1,2 +1,11 @@
 [tools]
 bun = "1.3.14"
+wrangler = { version = "4.99", allow_builds = ["esbuild", "sharp", "workerd"] }
+
+[tasks.init]
+run = """
+wrangler d1 migrations apply --local EDGE_DB --persist-to .wrangler/state
+"""
+
+[tasks.dev]
+run = "bun dev"
