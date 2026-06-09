@@ -10,9 +10,14 @@
         error: undefined | number;
     };
     let data = $state<Array<Results>>([]);
+    let spinner = $state("");
     let timePlaceholder = $state(0);
+    const seq = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+    const ITEMS_EXPECTED = 2;
 
     onMount(() => {
+        let ldb = document.getElementById("loading-bar");
+        let WIDTH = Math.floor(ldb?.clientWidth / 10);
         const sse = new EventSource("/measure");
 
         sse.onmessage = (e) => {
@@ -40,11 +45,10 @@
                     data[i].times.sort((a, b) => a - b);
                 }
 
-                console.log(result);
+                console.log("recv:", result);
             }
         };
 
-        let WIDTH = 180;
         let CHUNK_INTERNVAL = 3_000;
         let interval = setInterval(() => {
             let completed = false;
@@ -90,8 +94,15 @@
             }
         }, CHUNK_INTERNVAL / WIDTH);
 
+        let i = 0;
+        const spnInv = setInterval(() => {
+            spinner = seq[i];
+            i = (i + 1) % seq.length;
+        }, 200);
+
         return () => {
             sse.close();
+            clearInterval(spnInv);
         };
     });
 </script>
@@ -99,8 +110,37 @@
 <section
     class="flex h-full w-full flex-col items-center justify-center gap-8 sm:w-full lg:w-4/5"
 >
-    <h1 class="text-5xl font-bold">Edge cold starts</h1>
+    <h1 class="text-5xl font-bold">Edge Runtime's Cold Starts</h1>
     <div class="flex h-full w-full flex-col gap-8 border border-white p-10">
+        {#if data.length === 0}
+            {#each { length: ITEMS_EXPECTED }}
+                <div class="w-full flex items-center justify-center">
+                    <span class="flex flex-col leading-tight">
+                        <span>░░░░░░░░░░░░</span>
+                        <span class="text-black bg-white w-full text-center"
+                            >{`{ source }`}
+                        </span>
+                        <span>░░░░░░░░░░░░</span>
+                    </span>
+                    <div
+                        id="loading-bar"
+                        class="w-full flex flex-col justify-center items-center"
+                    >
+                        <span class="text-gray-500"
+                            >{spinner} loading results...</span
+                        >
+                    </div>
+
+                    <span class="flex flex-col leading-tight">
+                        <span>░░░░░░░░░░░░</span>
+                        <span class="text-black bg-white w-full text-center"
+                            >{`> edge <`}</span
+                        >
+                        <span>░░░░░░░░░░░░</span>
+                    </span>
+                </div>
+            {/each}
+        {/if}
         {#each data as d}
             <div class="w-full flex items-center justify-center">
                 <span
@@ -109,7 +149,9 @@
                     class:text-white!={d.error !== undefined}
                 >
                     <span>░░░░░░░░░░░░</span>
-                    <span class="text-black bg-white">░{`{ source }`} </span>
+                    <span class="text-black bg-white w-full text-center"
+                        >{`{ source }`}
+                    </span>
                     <span class="flex"
                         >░░░░░░░
                         {#if d.error}
@@ -162,9 +204,6 @@
                 </span>
             </div>
         {/each}
-        <!-- <h2 class="text-5xl font-bold"> -->
-        <!--     APIs, libraries, utility, and whatever else... -->
-        <!-- </h2> -->
     </div>
     <div class="flex gap-4 flex-col">
         <h3 class="text-3xl font-bold">Methodology</h3>
