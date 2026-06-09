@@ -13,7 +13,7 @@
     let spinner = $state("");
     let timePlaceholder = $state(0);
     const seq = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-    const ITEMS_EXPECTED = 2;
+    const ITEMS_EXPECTED = 13;
 
     onMount(() => {
         let ldb = document.getElementById("loading-bar");
