@@ -110,7 +110,7 @@
 <section
     class="flex h-full w-full flex-col items-center justify-center gap-8 sm:w-full lg:w-4/5"
 >
-    <h1 class="text-5xl font-bold">Edge Runtime's Cold Starts</h1>
+    <h1 class="text-5xl font-bold">Edge Round Trip and Cold Starts</h1>
     <div class="flex h-full w-full flex-col gap-8 border border-white p-10">
         {#if data.length === 0}
             {#each { length: ITEMS_EXPECTED }}
@@ -242,8 +242,9 @@
             can be viewed at the left most
         </p>
         <p>
-            So far we include the measured cold stars for: CloudFlare Workers
-            and CloudFlare Workers w/ WASM
+            So far we include the measured cold stars for: CloudFlare Workers,
+            Vercel Fluid Compute, Netlify Functions, Deno Deploy, Fastly
+            Compute. Using Go, NodeJS, Bun, Deno, Rust and WebAssembly
         </p>
     </div>
     <div class="flex gap-4 flex-col">
@@ -253,9 +254,9 @@
                 class="font-bold underline"
                 href="https://maxday.github.io/lambda-perf/"
                 >"Lambda Cold Start benchmark by maxday"</a
-            > I wanted a reliable way to help me measure and compare cold starts
-            between multiple host providers and runtimes, including WASM vs Native
-            for research purposes.
+            >I wanted a reliable way to help me measure and compare cold starts
+            between multiple host providers and runtimes, including WASM vs
+            Native for research purposes.
         </p>
     </div>
 </section>
