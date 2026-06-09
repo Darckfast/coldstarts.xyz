@@ -3,8 +3,8 @@ import type { RequestHandler } from "../$types";
 
 async function measureTimes(stub, platform) {
     let { results } = await platform.env.EDGE_DB.prepare(`SELECT 
-e.name, 
-h.timestamp, 
+e.name as edge, 
+h.timestamp as time, 
 h.metadata 
     FROM edges e 
     INNER JOIN history h 
