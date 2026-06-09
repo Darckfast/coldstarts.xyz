@@ -12,7 +12,7 @@
 </main>
 
 <footer class="text-white w-full flex justify-center fixed bottom-0 p-8">
-    Made by <a class="font-bold underline" href="https://darckfast.com"
-        >@darckfast</a
+    Made by <a class="font-bold underline" href="https://darckfast.com">
+        @darckfast</a
     >
 </footer>
