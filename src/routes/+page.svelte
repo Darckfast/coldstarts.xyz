@@ -17,7 +17,7 @@
 
     onMount(() => {
         let ldb = document.getElementById("loading-bar");
-        let WIDTH = Math.floor(ldb?.clientWidth / 10);
+        let WIDTH = Math.floor(ldb?.clientWidth / 10) * 2;
         const sse = new EventSource("/measure");
 
         sse.onmessage = (e) => {
