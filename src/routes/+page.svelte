@@ -25,10 +25,25 @@
 
             for (let j = 0; j < results.length; j++) {
                 let result = results[j];
-                let i = data.findIndex((x) => x.edge === result.edge);
 
                 if (result.id) {
                     return;
+                }
+
+                if (result.clear) {
+                    let idx = data.findIndex((x) => x.edge === result.clear);
+
+                    if (idx !== -1) {
+                        data[idx].times = [];
+                    }
+
+                    return;
+                }
+
+                let i = data.findIndex((x) => x.edge === result.edge);
+                let micro = String(result.time);
+                if (micro.length <= 13) {
+                    result.time *= 1000;
                 }
 
                 if (i === -1) {
@@ -39,17 +54,30 @@
                         completed: false,
                     });
                 } else {
-                    data[i].datacenter = result.datacenter;
+                    let item = data[i];
+
+                    if (item.times.length === 3) {
+                        item.times.shift();
+                    }
+
                     data[i].error = result.error;
                     data[i].times.push(result.time);
-                    data[i].times.sort((a, b) => a - b);
+
+                    if (result.metadata) {
+                        data[i].metadata = JSON.parse(result.metadata);
+                        data[i].coldstart = item.times[2] - item.times[1];
+                        data[i].coldstart -=
+                            (item.times[0] - data[i].metadata.first_byte) / 2;
+
+                        data[i].coldstart /= 1_000;
+                    }
                 }
 
                 console.log("recv:", result);
             }
         };
 
-        let CHUNK_INTERNVAL = 3_000;
+        let CHUNK_INTERNVAL = 2_000;
         let interval = setInterval(() => {
             let completed = false;
             timePlaceholder = Math.floor(Math.random() * 1000);
@@ -110,7 +138,7 @@
 <section
     class="flex h-full w-full flex-col items-center justify-center gap-8 sm:w-full lg:w-4/5"
 >
-    <h1 class="text-5xl font-bold">Edge Round Trip and Cold Starts</h1>
+    <h1 class="text-5xl font-bold">[■] ./edge_cold_starts</h1>
     <div class="flex h-full w-full flex-col gap-8 border border-white p-10">
         {#if data.length === 0}
             {#each { length: ITEMS_EXPECTED }}
@@ -152,21 +180,25 @@
                     <span class="text-black bg-white w-full text-center"
                         >{`{ source }`}
                     </span>
-                    <span class="flex"
-                        >░░░░░░░
-                        {#if d.error}
-                            <span class="text-bold w-full text-end">error</span>
-                        {:else if d.completed}
-                            <span
-                                class="text-black bg-white text-bold w-full text-end"
-                                >{d.times[2] - d.times[0]}ms</span
-                            >
-                        {:else}
-                            <span
-                                class="text-black bg-white text-bold w-full text-end"
-                                >{timePlaceholder}</span
-                            >
-                        {/if}
+                    <span class="flex relative"
+                        >░░░░░░░░░░░░
+                        <span class="absolute right-0">
+                            {#if d.error}
+                                <span class="text-bold w-full text-end"
+                                    >error</span
+                                >
+                            {:else if d.completed}
+                                <span
+                                    class="text-black bg-white text-bold w-full text-end"
+                                    >{(d.times[2] - d.times[0]) / 1000}ms</span
+                                >
+                            {:else}
+                                <span
+                                    class="text-black bg-white text-bold w-full text-end"
+                                    >{timePlaceholder}ms</span
+                                >
+                            {/if}
+                        </span>
                     </span>
                 </span>
                 <div
@@ -178,36 +210,87 @@
                     {#if d.error}
                         <span class="font-bold">ERROR</span>
                     {:else}
-                        <span class="absolute text-gray-300 bg-black px-2"
-                            >{d.datacenter}</span
+                        <div
+                            class="absolute text-gray-300 bg-black px-2 flex gap-4"
                         >
+                            <div class="flex">
+                                <label for="region" class="font-bold"
+                                    >Region
+                                </label>
+                                <span id="region" class="uppercase"
+                                    >={d.metadata?.datacenter || "N/A"}</span
+                                >
+                            </div>
+                            <div class="flex">
+                                <label for="dns" class="font-bold">DNS</label>
+                                <span id="dns"
+                                    >={(d.metadata?.dns_lookup_end -
+                                        d.metadata?.dns_lookup_start) /
+                                        1000}ms
+                                </span>
+                            </div>
+                            <div class="flex">
+                                <label for="tcp" class="font-bold">TCP: </label>
+                                <span id="tcp"
+                                    >{(d.metadata?.tcp_handshake_end -
+                                        d.metadata?.tcp_handshake_start) /
+                                        1000}ms</span
+                                >
+                            </div>
+                            <div class="flex">
+                                <label for="tls" class="font-bold">TLS: </label>
+                                <span id="tls"
+                                    >{(d.metadata?.tls_handshake_end -
+                                        d.metadata?.tls_handshake_start) /
+                                        1000}ms</span
+                                >
+                            </div>
+                            <div class="flex">
+                                <label for="fb" class="font-bold"
+                                    >First-Byte:
+                                </label>
+                                <span id="fb"
+                                    >{(d.metadata?.first_byte - d.times[0]) /
+                                        1000}ms</span
+                                >
+                            </div>
+
+                            <div class="flex">
+                                <label for="cs" class="font-bold">Cold</label>
+                                <span id="cs">={d.coldstart}ms</span>
+                            </div>
+                        </div>
                     {/if}
                 </div>
 
                 <span
-                    class="flex flex-col leading-tight"
+                    class="flex flex-col leading-tight relative"
                     class:bg-red-500!={d.error !== undefined}
                     class:text-white!={d.error !== undefined}
                 >
-                    <span>░░░░░░░░░░░░</span>
+                    <div
+                        class="bg-[radial-gradient(white_1px,transparent_1px)] bg-size-[3px_3px] opacity-20 w-full h-full absolute"
+                    ></div>
                     <span class="text-black bg-white w-full text-center"
                         >{`> ${d.edge} <`}</span
                     >
                     <span
-                        class="flex text-bold w-full text-start justify-between"
+                        class="flex text-bold w-full text-start justify-between relative"
                     >
-                        {#if d.error}
-                            <span class="">error</span>
-                        {:else if d.half_completed}
-                            <span class="text-black bg-white w-full"
-                                >{d.times[1] - d.times[0]}ms</span
-                            >
-                        {:else}
-                            <span class="text-black bg-white w-full"
-                                >{timePlaceholder}</span
-                            >
-                        {/if}
-                        <span>░░░░░░░</span>
+                        ░
+                        <span class="absolute left-0">
+                            {#if d.error}
+                                <span class="">error</span>
+                            {:else if d.half_completed}
+                                <span class="text-black bg-white w-full"
+                                    >{(d.times[1] - d.times[0]) / 1000}ms</span
+                                >
+                            {:else}
+                                <span class="text-black bg-white w-full"
+                                    >{timePlaceholder}ms</span
+                                >
+                            {/if}
+                        </span>
                     </span>
                 </span>
             </div>
@@ -216,34 +299,19 @@
     <div class="flex gap-4 flex-col">
         <h3 class="text-3xl font-bold">Methodology</h3>
         <p>
-            A CloudFlare Worker fires a series of request, and we measure the
-            time when the request was made, when the targeted edge sends a
-            response, and when this request reaches our source.
-        </p>
-
-        <p>
-            the <span class="text-black bg-white">{"{ source }"}</span> sends a
-            HTTP request to the
-            <span class="text-black bg-white">{"> edge <"}</span>
-            with no payload, and the
-            <span class="text-black bg-white">{"> edge <"}</span> sends a
-            response containing a timestamp of when it was processed, then we
-            mark when this response was received by the
-            <span class="text-black bg-white">{"{ source }"}</span>
-        </p>
-        <p>
-            The time from <span class="text-black bg-white">{"{ source }"}</span
+            A CronJob hosted on <a
+                class="font-bold underline"
+                href="https://render.com">Render.com</a
             >
-            to
-            <span class="text-black bg-white">{"> edge <"}</span>
-            can viewed at the right most. The time from
-            <span class="text-black bg-white">{"{ source }"}</span>
-            back to <span class="text-black bg-white">{"{ source }"}</span>
-            can be viewed at the left most
+            fires a series of HTTP requests to the
+            <span class="text-black bg-white">{"> edge <"}</span>, and we
+            measure DNS Lookup, TCP Handhshake, TLS Handshake, First-Byte,
+            Coldstart and Rountrip times from the
+            <span class="text-black bg-white">{"{ source }"}</span>.
         </p>
         <p>
             So far we include the measured cold stars for: CloudFlare Workers,
-            Vercel Fluid Compute, Netlify Functions, Deno Deploy, Fastly
+            Vercel Fluid Compute, Netlify Functions, Deno Deploy, and Fastly
             Compute. Using Go, NodeJS, Bun, Deno, Rust and WebAssembly
         </p>
     </div>
@@ -256,7 +324,7 @@
                 >"Lambda Cold Start benchmark by maxday"</a
             >I wanted a reliable way to help me measure and compare cold starts
             between multiple host providers and runtimes, including WASM vs
-            Native for research purposes.
+            Native, for research purposes.
         </p>
     </div>
 </section>

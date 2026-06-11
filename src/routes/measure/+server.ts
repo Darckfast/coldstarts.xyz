@@ -10,14 +10,12 @@ h.metadata
     INNER JOIN history h 
         ON h.edge_id = e.id
     WHERE h.created_at >= unixepoch('subsec') * 1000 - 3600000 -1
-    ORDER BY h.id`).run()
+    ORDER BY e.name, h.id`).run()
     let proms = []
 
-    console.log(results)
     for (let i = 0; i < results.length; i++) {
         let edge = results[i]
         proms.push(stub.pushData(JSON.stringify(edge)))
-        console.log(edge)
     }
 
     await Promise.allSettled(proms)
