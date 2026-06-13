@@ -70,6 +70,9 @@
                             (item.times[0] - data[i].metadata.first_byte) / 2;
 
                         data[i].coldstart /= 1_000;
+                        data[i].coldstart = data[i].coldstart.toFixed(2);
+
+                        data.sort((a, b) => a.coldstart - b.coldstart);
                     }
                 }
 
@@ -133,6 +136,10 @@
             clearInterval(spnInv);
         };
     });
+
+    function formatNum(end, start) {
+        return ((end - start) / 1000).toFixed(2);
+    }
 </script>
 
 <section
@@ -172,34 +179,20 @@
         {#each data as d}
             <div class="w-full flex items-center justify-center">
                 <span
-                    class="flex flex-col leading-tight"
+                    class="flex flex-col leading-tight relative"
                     class:bg-red-500!={d.error !== undefined}
                     class:text-white!={d.error !== undefined}
                 >
-                    <span>░░░░░░░░░░░░</span>
-                    <span class="text-black bg-white w-full text-center"
-                        >{`{ source }`}
-                    </span>
-                    <span class="flex relative"
-                        >░░░░░░░░░░░░
-                        <span class="absolute right-0">
-                            {#if d.error}
-                                <span class="text-bold w-full text-end"
-                                    >error</span
-                                >
-                            {:else if d.completed}
-                                <span
-                                    class="text-black bg-white text-bold w-full text-end"
-                                    >{(d.times[2] - d.times[0]) / 1000}ms</span
-                                >
-                            {:else}
-                                <span
-                                    class="text-black bg-white text-bold w-full text-end"
-                                    >{timePlaceholder}ms</span
-                                >
-                            {/if}
-                        </span>
-                    </span>
+                    <div
+                        class="bg-[radial-gradient(white_1px,transparent_1px)] bg-size-[3px_3px] opacity-20 w-full h-full absolute"
+                    ></div>
+                    <div
+                        class="text-white w-full text-center flex justify-center items-center gap-1 p-2"
+                    >
+                        <span class="font-bold">{`{`}</span>
+                        <span>source</span>
+                        <span class="font-bold">{`}`}</span>
+                    </div>
                 </span>
                 <div
                     class="w-full flex flex-col justify-center items-center"
@@ -211,53 +204,59 @@
                         <span class="font-bold">ERROR</span>
                     {:else}
                         <div
-                            class="absolute text-gray-300 bg-black px-2 flex gap-4"
+                            class="absolute text-gray-300 flex gap-1 flex-col jutify-center items-center"
                         >
-                            <div class="flex">
-                                <label for="region" class="font-bold"
-                                    >Region
-                                </label>
-                                <span id="region" class="uppercase"
-                                    >={d.metadata?.datacenter || "N/A"}</span
+                            <div class="flex gap-1 bg-black px-1">
+                                <label for="cs">Cold:</label>
+                                <span id="cs" class="font-bold"
+                                    >{d.coldstart}ms</span
                                 >
                             </div>
-                            <div class="flex">
-                                <label for="dns" class="font-bold">DNS</label>
-                                <span id="dns"
-                                    >={(d.metadata?.dns_lookup_end -
-                                        d.metadata?.dns_lookup_start) /
-                                        1000}ms
-                                </span>
-                            </div>
-                            <div class="flex">
-                                <label for="tcp" class="font-bold">TCP: </label>
-                                <span id="tcp"
-                                    >{(d.metadata?.tcp_handshake_end -
-                                        d.metadata?.tcp_handshake_start) /
-                                        1000}ms</span
-                                >
-                            </div>
-                            <div class="flex">
-                                <label for="tls" class="font-bold">TLS: </label>
-                                <span id="tls"
-                                    >{(d.metadata?.tls_handshake_end -
-                                        d.metadata?.tls_handshake_start) /
-                                        1000}ms</span
-                                >
-                            </div>
-                            <div class="flex">
-                                <label for="fb" class="font-bold"
-                                    >First-Byte:
-                                </label>
-                                <span id="fb"
-                                    >{(d.metadata?.first_byte - d.times[0]) /
-                                        1000}ms</span
-                                >
-                            </div>
-
-                            <div class="flex">
-                                <label for="cs" class="font-bold">Cold</label>
-                                <span id="cs">={d.coldstart}ms</span>
+                            <div class="flex gap-2 text-xs bg-black px-1">
+                                <div class="flex">
+                                    <label for="region" class="font-bold"
+                                        >Region:</label
+                                    >
+                                    <span id="region" class="uppercase"
+                                        >{d.metadata?.datacenter || "N/A"}</span
+                                    >
+                                </div>
+                                <div class="flex">
+                                    <label for="dns">DNS:</label>
+                                    <span id="dns" class="font-bold"
+                                        >{formatNum(
+                                            d.metadata?.dns_lookup_end,
+                                            d.metadata?.dns_lookup_start,
+                                        )}ms
+                                    </span>
+                                </div>
+                                <div class="flex">
+                                    <label for="tcp">TCP: </label>
+                                    <span id="tcp" class="font-bold"
+                                        >{formatNum(
+                                            d.metadata?.tcp_handshake_end,
+                                            d.metadata?.tcp_handshake_start,
+                                        )}ms</span
+                                    >
+                                </div>
+                                <div class="flex">
+                                    <label for="tls">TLS: </label>
+                                    <span id="tls" class="font-bold"
+                                        >{formatNum(
+                                            d.metadata?.tls_handshake_end,
+                                            d.metadata?.tls_handshake_start,
+                                        )}ms</span
+                                    >
+                                </div>
+                                <div class="flex">
+                                    <label for="fb">First-Byte: </label>
+                                    <span id="fb" class="font-bold"
+                                        >{formatNum(
+                                            d.metadata?.first_byte,
+                                            d.times[0],
+                                        )}ms</span
+                                    >
+                                </div>
                             </div>
                         </div>
                     {/if}
@@ -271,27 +270,13 @@
                     <div
                         class="bg-[radial-gradient(white_1px,transparent_1px)] bg-size-[3px_3px] opacity-20 w-full h-full absolute"
                     ></div>
-                    <span class="text-black bg-white w-full text-center"
-                        >{`> ${d.edge} <`}</span
+                    <div
+                        class="text-black bg-white w-full text-center flex gap-1 justify-center items-center p-2"
                     >
-                    <span
-                        class="flex text-bold w-full text-start justify-between relative"
-                    >
-                        ░
-                        <span class="absolute left-0">
-                            {#if d.error}
-                                <span class="">error</span>
-                            {:else if d.half_completed}
-                                <span class="text-black bg-white w-full"
-                                    >{(d.times[1] - d.times[0]) / 1000}ms</span
-                                >
-                            {:else}
-                                <span class="text-black bg-white w-full"
-                                    >{timePlaceholder}ms</span
-                                >
-                            {/if}
-                        </span>
-                    </span>
+                        <span class="font-bold">{`>`}</span>
+                        <span>{d.edge}</span>
+                        <span class="font-bold">{`<`}</span>
+                    </div>
                 </span>
             </div>
         {/each}
@@ -303,10 +288,10 @@
                 class="font-bold underline"
                 href="https://render.com">Render.com</a
             >
-            fires a series of HTTP requests to the
+            fires a series of HTTP requests every hour to the
             <span class="text-black bg-white">{"> edge <"}</span>, and we
-            measure DNS Lookup, TCP Handhshake, TLS Handshake, First-Byte,
-            Coldstart and Rountrip times from the
+            measure DNS Lookup, TCP Handhshake, TLS Handshake, First-Byte, and
+            Coldstart times from the
             <span class="text-black bg-white">{"{ source }"}</span>.
         </p>
         <p>
