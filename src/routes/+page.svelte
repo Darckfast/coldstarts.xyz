@@ -145,8 +145,10 @@
 <section
     class="flex h-full w-full flex-col items-center justify-center gap-8 sm:w-full lg:w-4/5"
 >
-    <h1 class="text-5xl font-bold">[■] ./edge_cold_starts</h1>
-    <div class="flex h-full w-full flex-col gap-8 border border-white p-10">
+    <h1 class="sm:text-5xl font-bold text-xl">[■] ./edge_cold_starts</h1>
+    <div
+        class="flex h-full w-full flex-col sm:gap-8 gap-4 border border-white p-1 sm:p-10"
+    >
         {#if data.length === 0}
             {#each { length: ITEMS_EXPECTED }}
                 <div class="w-full flex items-center justify-center">
@@ -177,9 +179,9 @@
             {/each}
         {/if}
         {#each data as d}
-            <div class="w-full flex items-center justify-center">
+            <div class="sm:w-full flex items-center justify-center">
                 <span
-                    class="flex flex-col leading-tight relative"
+                    class="hidden sm:flex flex-col leading-tight relative"
                     class:bg-red-500!={d.error !== undefined}
                     class:text-white!={d.error !== undefined}
                 >
@@ -195,16 +197,18 @@
                     </div>
                 </span>
                 <div
-                    class="w-full flex flex-col justify-center items-center"
+                    class="sm:w-full flex flex-col justify-center items-center"
                     class:bg-red-500!={d.error !== undefined}
                     class:text-white!={d.error !== undefined}
                 >
-                    <span class="w-full text-gray-500">{d.loading}</span>
+                    <span class="sm:w-full hidden sm:flex text-gray-500"
+                        >{d.loading}</span
+                    >
                     {#if d.error}
                         <span class="font-bold">ERROR</span>
                     {:else}
                         <div
-                            class="absolute text-gray-300 flex gap-1 flex-col jutify-center items-center"
+                            class="sm:absolute text-gray-300 flex gap-1 flex-col jutify-center sm:items-center items-start"
                         >
                             <div class="flex gap-1 bg-black px-1">
                                 <label for="cs">Cold:</label>
@@ -212,7 +216,9 @@
                                     >{d.coldstart}ms</span
                                 >
                             </div>
-                            <div class="flex gap-2 text-xs bg-black px-1">
+                            <div
+                                class="flex flex-wrap gap-2 text-xs bg-black px-1"
+                            >
                                 <div class="flex">
                                     <label for="region" class="font-bold"
                                         >Region:</label
@@ -270,6 +276,11 @@
                     <div
                         class="bg-[radial-gradient(white_1px,transparent_1px)] bg-size-[3px_3px] opacity-20 w-full h-full absolute"
                     ></div>
+                    {#if d.repo}
+                        <a class="font-bold underlined" href={d.repo}>
+                            {"<code/>"}
+                        </a>
+                    {/if}
                     <div
                         class="text-black bg-white w-full text-center flex gap-1 justify-center items-center p-2"
                     >
@@ -281,35 +292,35 @@
             </div>
         {/each}
     </div>
-    <div class="flex gap-4 flex-col">
+    <div class="flex gap-4 flex-col p-2">
         <h3 class="text-3xl font-bold">Methodology</h3>
         <p>
             A CronJob hosted on <a
                 class="font-bold underline"
                 href="https://render.com">Render.com</a
-            >
-            fires a series of HTTP requests every hour to the
+            >, in Virginia (US East), fires a series of HTTP requests every hour
+            to the
             <span class="text-black bg-white">{"> edge <"}</span>, and we
-            measure DNS Lookup, TCP Handhshake, TLS Handshake, First-Byte, and
+            measure DNS Lookup, TCP Handshake, TLS Handshake, First-Byte, and
             Coldstart times from the
             <span class="text-black bg-white">{"{ source }"}</span>.
         </p>
         <p>
-            So far we include the measured cold stars for: CloudFlare Workers,
+            So far we include the measured cold stars for CloudFlare Workers,
             Vercel Fluid Compute, Netlify Functions, Deno Deploy, and Fastly
             Compute. Using Go, NodeJS, Bun, Deno, Rust and WebAssembly
         </p>
     </div>
-    <div class="flex gap-4 flex-col">
+    <div class="flex gap-4 flex-col p-2">
         <h3 class="text-3xl font-bold">Why?</h3>
         <p>
             Inspired by <a
                 class="font-bold underline"
                 href="https://maxday.github.io/lambda-perf/"
                 >"Lambda Cold Start benchmark by maxday"</a
-            >I wanted a reliable way to help me measure and compare cold starts
-            between multiple host providers and runtimes, including WASM vs
-            Native, for research purposes.
+            >. I wanted a reliable way to help me measure and compare cold
+            starts between multiple host providers and runtimes, including WASM
+            vs. Native, for research purposes.
         </p>
     </div>
 </section>

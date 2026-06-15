@@ -11,8 +11,7 @@
     {@render children()}
 </main>
 
-<footer class="text-white w-full flex justify-center bottom-0 p-8">
-    Made by <a class="font-bold underline" href="https://darckfast.com">
-        @darckfast</a
-    >
+<footer class="text-white w-full flex justify-center bottom-0 p-8 gap-2">
+    <span> Made by</span>
+    <a class="font-bold underline" href="https://darckfast.com"> @darckfast</a>
 </footer>
