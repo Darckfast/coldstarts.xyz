@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://coldstarts.xyz">
-    <img alt="workers-go" src="./static/logo.svg">
+    <img alt="workers-go" src="./static/logo.png">
     <h1 align="center">workers-go</h1>
   </a>
 </p>
