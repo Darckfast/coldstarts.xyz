@@ -179,7 +179,9 @@
             {/each}
         {/if}
         {#each data as d}
-            <div class="sm:w-full flex items-center justify-center">
+            <div
+                class="sm:w-full flex items-center justify-center sm:grid sm:grid-cols-6"
+            >
                 <span
                     class="hidden sm:flex flex-col leading-tight relative"
                     class:bg-red-500!={d.error !== undefined}
@@ -197,7 +199,7 @@
                     </div>
                 </span>
                 <div
-                    class="sm:w-full flex flex-col justify-center items-center"
+                    class="sm:w-full flex flex-col justify-center items-center sm:col-span-4 sm:col-start-2"
                     class:bg-red-500!={d.error !== undefined}
                     class:text-white!={d.error !== undefined}
                 >
