@@ -9,7 +9,7 @@ h.metadata
     FROM edges e 
     INNER JOIN history h 
         ON h.edge_id = e.id
-    WHERE h.created_at >= unixepoch('subsec') * 1000 - 3600000 -1
+    WHERE h.created_at >= unixepoch('subsec') * 1000 - 7200000 -1
     ORDER BY e.name, h.id`).run()
     let proms = []
 
