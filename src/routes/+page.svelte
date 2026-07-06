@@ -14,11 +14,15 @@
     let timePlaceholder = $state(0);
     const seq = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
     const ITEMS_EXPECTED = 13;
+    let isError = $state(false);
 
     onMount(() => {
         let ldb = document.getElementById("loading-bar");
         let WIDTH = Math.floor(ldb?.clientWidth / 10) * 2;
         const sse = new EventSource("/measure");
+        sse.onerror = () => {
+            isError = true;
+        };
 
         sse.onmessage = (e) => {
             let results = JSON.parse(e.data);
@@ -149,150 +153,157 @@
     <div
         class="flex h-full w-full flex-col sm:gap-8 gap-4 border border-white p-1 sm:p-10"
     >
-        {#if data.length === 0}
-            {#each { length: ITEMS_EXPECTED }}
-                <div class="w-full flex items-center justify-center">
-                    <span class="flex flex-col leading-tight">
-                        <span>░░░░░░░░░░░░</span>
-                        <span class="text-black bg-white w-full text-center"
-                            >{`{ source }`}
+        {#if isError}
+            <p class="w-full flex items-center justify-center">
+                Ops, seems like we are overloaded :( wait a minute and try again
+            </p>
+        {:else}
+            {#if data.length === 0}
+                {#each { length: ITEMS_EXPECTED }}
+                    <div class="w-full flex items-center justify-center">
+                        <span class="flex flex-col leading-tight">
+                            <span>░░░░░░░░░░░░</span>
+                            <span class="text-black bg-white w-full text-center"
+                                >{`{ source }`}
+                            </span>
+                            <span>░░░░░░░░░░░░</span>
                         </span>
-                        <span>░░░░░░░░░░░░</span>
+                        <div
+                            id="loading-bar"
+                            class="w-full flex flex-col justify-center items-center"
+                        >
+                            <span class="text-gray-500"
+                                >{spinner} loading results...</span
+                            >
+                        </div>
+
+                        <span class="flex flex-col leading-tight">
+                            <span>░░░░░░░░░░░░</span>
+                            <span class="text-black bg-white w-full text-center"
+                                >{`> edge <`}</span
+                            >
+                            <span>░░░░░░░░░░░░</span>
+                        </span>
+                    </div>
+                {/each}
+            {/if}
+            {#each data as d}
+                <div
+                    class="sm:w-full flex items-center justify-center sm:grid sm:grid-cols-6"
+                >
+                    <span
+                        class="hidden sm:flex flex-col leading-tight relative"
+                        class:bg-red-500!={d.error !== undefined}
+                        class:text-white!={d.error !== undefined}
+                    >
+                        <div
+                            class="bg-[radial-gradient(white_1px,transparent_1px)] bg-size-[3px_3px] opacity-20 w-full h-full absolute"
+                        ></div>
+                        <div
+                            class="text-white w-full text-center flex justify-center items-center gap-1 p-2"
+                        >
+                            <span class="font-bold">{`{`}</span>
+                            <span>source</span>
+                            <span class="font-bold">{`}`}</span>
+                        </div>
                     </span>
                     <div
-                        id="loading-bar"
-                        class="w-full flex flex-col justify-center items-center"
+                        class="sm:w-full flex flex-col justify-center items-center sm:col-span-4 sm:col-start-2"
+                        class:bg-red-500!={d.error !== undefined}
+                        class:text-white!={d.error !== undefined}
                     >
-                        <span class="text-gray-500"
-                            >{spinner} loading results...</span
+                        <span class="sm:w-full hidden sm:flex text-gray-500"
+                            >{d.loading}</span
                         >
+                        {#if d.error}
+                            <span class="font-bold">ERROR</span>
+                        {:else}
+                            <div
+                                class="sm:absolute text-gray-300 flex gap-1 flex-col jutify-center sm:items-center items-start"
+                            >
+                                <div class="flex gap-1 bg-black px-1">
+                                    <label for="cs">Cold:</label>
+                                    <span id="cs" class="font-bold"
+                                        >{d.coldstart}ms</span
+                                    >
+                                </div>
+                                <div
+                                    class="flex flex-wrap gap-2 text-xs bg-black px-1"
+                                >
+                                    <div class="flex">
+                                        <label for="region" class="font-bold"
+                                            >Region:</label
+                                        >
+                                        <span id="region" class="uppercase"
+                                            >{d.metadata?.datacenter ||
+                                                "N/A"}</span
+                                        >
+                                    </div>
+                                    <div class="flex">
+                                        <label for="dns">DNS:</label>
+                                        <span id="dns" class="font-bold"
+                                            >{formatNum(
+                                                d.metadata?.dns_lookup_end,
+                                                d.metadata?.dns_lookup_start,
+                                            )}ms
+                                        </span>
+                                    </div>
+                                    <div class="flex">
+                                        <label for="tcp">TCP: </label>
+                                        <span id="tcp" class="font-bold"
+                                            >{formatNum(
+                                                d.metadata?.tcp_handshake_end,
+                                                d.metadata?.tcp_handshake_start,
+                                            )}ms</span
+                                        >
+                                    </div>
+                                    <div class="flex">
+                                        <label for="tls">TLS: </label>
+                                        <span id="tls" class="font-bold"
+                                            >{formatNum(
+                                                d.metadata?.tls_handshake_end,
+                                                d.metadata?.tls_handshake_start,
+                                            )}ms</span
+                                        >
+                                    </div>
+                                    <div class="flex">
+                                        <label for="fb">First-Byte: </label>
+                                        <span id="fb" class="font-bold"
+                                            >{formatNum(
+                                                d.metadata?.first_byte,
+                                                d.times[0],
+                                            )}ms</span
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        {/if}
                     </div>
 
-                    <span class="flex flex-col leading-tight">
-                        <span>░░░░░░░░░░░░</span>
-                        <span class="text-black bg-white w-full text-center"
-                            >{`> edge <`}</span
+                    <span
+                        class="flex flex-col leading-tight relative"
+                        class:bg-red-500!={d.error !== undefined}
+                        class:text-white!={d.error !== undefined}
+                    >
+                        <div
+                            class="bg-[radial-gradient(white_1px,transparent_1px)] bg-size-[3px_3px] opacity-20 w-full h-full absolute"
+                        ></div>
+                        {#if d.repo}
+                            <a class="font-bold underlined" href={d.repo}>
+                                {"<code/>"}
+                            </a>
+                        {/if}
+                        <div
+                            class="text-black bg-white w-full text-center flex gap-1 justify-center items-center p-2"
                         >
-                        <span>░░░░░░░░░░░░</span>
+                            <span class="font-bold">{`>`}</span>
+                            <span>{d.edge}</span>
+                            <span class="font-bold">{`<`}</span>
+                        </div>
                     </span>
                 </div>
             {/each}
         {/if}
-        {#each data as d}
-            <div
-                class="sm:w-full flex items-center justify-center sm:grid sm:grid-cols-6"
-            >
-                <span
-                    class="hidden sm:flex flex-col leading-tight relative"
-                    class:bg-red-500!={d.error !== undefined}
-                    class:text-white!={d.error !== undefined}
-                >
-                    <div
-                        class="bg-[radial-gradient(white_1px,transparent_1px)] bg-size-[3px_3px] opacity-20 w-full h-full absolute"
-                    ></div>
-                    <div
-                        class="text-white w-full text-center flex justify-center items-center gap-1 p-2"
-                    >
-                        <span class="font-bold">{`{`}</span>
-                        <span>source</span>
-                        <span class="font-bold">{`}`}</span>
-                    </div>
-                </span>
-                <div
-                    class="sm:w-full flex flex-col justify-center items-center sm:col-span-4 sm:col-start-2"
-                    class:bg-red-500!={d.error !== undefined}
-                    class:text-white!={d.error !== undefined}
-                >
-                    <span class="sm:w-full hidden sm:flex text-gray-500"
-                        >{d.loading}</span
-                    >
-                    {#if d.error}
-                        <span class="font-bold">ERROR</span>
-                    {:else}
-                        <div
-                            class="sm:absolute text-gray-300 flex gap-1 flex-col jutify-center sm:items-center items-start"
-                        >
-                            <div class="flex gap-1 bg-black px-1">
-                                <label for="cs">Cold:</label>
-                                <span id="cs" class="font-bold"
-                                    >{d.coldstart}ms</span
-                                >
-                            </div>
-                            <div
-                                class="flex flex-wrap gap-2 text-xs bg-black px-1"
-                            >
-                                <div class="flex">
-                                    <label for="region" class="font-bold"
-                                        >Region:</label
-                                    >
-                                    <span id="region" class="uppercase"
-                                        >{d.metadata?.datacenter || "N/A"}</span
-                                    >
-                                </div>
-                                <div class="flex">
-                                    <label for="dns">DNS:</label>
-                                    <span id="dns" class="font-bold"
-                                        >{formatNum(
-                                            d.metadata?.dns_lookup_end,
-                                            d.metadata?.dns_lookup_start,
-                                        )}ms
-                                    </span>
-                                </div>
-                                <div class="flex">
-                                    <label for="tcp">TCP: </label>
-                                    <span id="tcp" class="font-bold"
-                                        >{formatNum(
-                                            d.metadata?.tcp_handshake_end,
-                                            d.metadata?.tcp_handshake_start,
-                                        )}ms</span
-                                    >
-                                </div>
-                                <div class="flex">
-                                    <label for="tls">TLS: </label>
-                                    <span id="tls" class="font-bold"
-                                        >{formatNum(
-                                            d.metadata?.tls_handshake_end,
-                                            d.metadata?.tls_handshake_start,
-                                        )}ms</span
-                                    >
-                                </div>
-                                <div class="flex">
-                                    <label for="fb">First-Byte: </label>
-                                    <span id="fb" class="font-bold"
-                                        >{formatNum(
-                                            d.metadata?.first_byte,
-                                            d.times[0],
-                                        )}ms</span
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                    {/if}
-                </div>
-
-                <span
-                    class="flex flex-col leading-tight relative"
-                    class:bg-red-500!={d.error !== undefined}
-                    class:text-white!={d.error !== undefined}
-                >
-                    <div
-                        class="bg-[radial-gradient(white_1px,transparent_1px)] bg-size-[3px_3px] opacity-20 w-full h-full absolute"
-                    ></div>
-                    {#if d.repo}
-                        <a class="font-bold underlined" href={d.repo}>
-                            {"<code/>"}
-                        </a>
-                    {/if}
-                    <div
-                        class="text-black bg-white w-full text-center flex gap-1 justify-center items-center p-2"
-                    >
-                        <span class="font-bold">{`>`}</span>
-                        <span>{d.edge}</span>
-                        <span class="font-bold">{`<`}</span>
-                    </div>
-                </span>
-            </div>
-        {/each}
     </div>
     <div class="flex gap-4 flex-col p-2">
         <h3 class="text-3xl font-bold">Methodology</h3>

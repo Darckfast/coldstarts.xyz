@@ -21,6 +21,11 @@
                 "name": "DURABLE_SSE",
                 "script_name": "durable-sse",
                 "class_name": "DurableSSE"
+            },
+            {
+                "name": "RUSTY_LIMITER",
+                "script_name": "durable-rusty-limiter",
+                "class_name": "RustyLimiter"
             }
         ]
     },

@@ -21,18 +21,27 @@ h.metadata
     await Promise.allSettled(proms)
 }
 
-export const GET: RequestHandler = async ({ platform }) => {
-    let stub = platform?.env.DURABLE_SSE.getByName("cold-starts")
-    let stream = await stub.createStream()
+export const GET: RequestHandler = async ({ platform, getClientAddress, request }) => {
+    let ip = request.headers.get('cf-connecting-ip') ||
+        request.headers.get('x-forwarded-for') || getClientAddress()
+    let limiter = platform?.env.RUSTY_LIMITER.getByName(ip)
+    let rs = await limiter.fetch("http://rate-limit")
 
-    platform?.ctx.waitUntil(measureTimes(stub, platform))
+    if (rs.ok) {
+        let stub = platform?.env.DURABLE_SSE.getByName("cold-starts")
+        let stream = await stub.createStream()
 
-    return new Response(stream, {
-        headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-        },
-    });
+        platform?.ctx.waitUntil(measureTimes(stub, platform))
+
+        return new Response(stream, {
+            headers: {
+                "Content-Type": "text/event-stream",
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+            },
+        });
+    }
+
+    return new Response(null, { status: rs.status, headers: rs.headers })
 }
 
