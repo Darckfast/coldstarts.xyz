@@ -25,6 +25,7 @@
         };
 
         sse.onmessage = (e) => {
+            isError = false;
             let results = JSON.parse(e.data);
 
             for (let j = 0; j < results.length; j++) {
