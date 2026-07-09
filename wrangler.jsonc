@@ -3,6 +3,8 @@
     "name": "coldstarts-xyz",
     "main": ".svelte-kit/cloudflare/_worker.js",
     "compatibility_date": "2026-06-08",
+    "workers_dev": false,
+    "preview_urls": false,
     "compatibility_flags": [
         "nodejs_compat",
         "nodejs_als"
@@ -34,6 +36,7 @@
             "binding": "EDGE_DB",
             "database_name": "edge-cold-starts",
             "database_id": "4c8d40c7-c347-4bf6-9a0d-4e8afa9b74f9",
+            "remote": true
         }
     ]
 }
