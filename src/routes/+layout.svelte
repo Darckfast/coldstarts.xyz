@@ -1,11 +1,8 @@
 <script lang="ts">
-    import favicon from "$lib/assets/favicon.svg";
     import "./layout.css";
 
     let { children } = $props();
 </script>
-
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
 <main class="mt-8 flex flex-col items-center justify-center text-white">
     {@render children()}
